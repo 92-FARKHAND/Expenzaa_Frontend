@@ -6,8 +6,8 @@ import {
   useGetExpensesQuery,
   useDeleteExpenseMutation,
 } from "../../store/features/expenseApi.js";
-import{
-  useGetUserCategoriesQuery
+import {
+  useGetCategoriesQuery
 } from "../../store/features/categoryApi.js"
 
 const Expenses = () => {
@@ -152,21 +152,14 @@ const Expenses = () => {
       {showExpenseForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 animate-fadeIn">
           <div className="relative w-[90%] sm:w-[85%] md:w-[50%] lg:w-[40%] xl:w-[30%] max-w-4xl">
-            {/* Close Button */}
-            <button
-              onClick={() => {
-                setShowExpenseForm(false);
-                setEditingExpense(null);
-              }}
-              className="absolute -top-10 right-0 text-gray-400 hover:text-white transition"
-            >
-              <X size={24} />
-            </button>
-
             <ExpenseForm
               mode="edit"
               defaultValues={editingExpense || {}}
               onSuccess={() => {
+                setShowExpenseForm(false);
+                setEditingExpense(null);
+              }}
+              onClose={() => {
                 setShowExpenseForm(false);
                 setEditingExpense(null);
               }}

@@ -1,7 +1,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { X } from 'lucide-react';
 
-const Form = ({ fields, onSubmit, defaultValues = {}, submitLabel = "Submit" }) => {
+const Form = ({ fields, onSubmit, defaultValues = {}, submitLabel = "Submit", onClose, apiError = null }) => {
   const {
     register,
     handleSubmit,
@@ -86,43 +87,94 @@ const Form = ({ fields, onSubmit, defaultValues = {}, submitLabel = "Submit" }) 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4"
+      className=" relative"
       encType="multipart/form-data"
       noValidate
     >
-      {fields.map((field, index) => (
-        <div key={index} className="flex flex-col gap-1">
-          <label
-            htmlFor={field.name}
-            className="font-medium text-sm text-white"
-          >
-            {field.label}
-          </label>
+      {/* Close Button */}
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute -top-15 -right-4 text-gray-400 hover:text-white transition bg-gray-800 rounded-full p-1 border border-gray-600 hover:bg-red-600 shadow-lg z-50"
+        >
+          <X size={20} />
+        </button>
+      )}
 
-          {renderField(field)}
 
-          {errors[field.name] && (
-            <p className="text-sm text-red-500">
-              {errors[field.name]?.message}
-            </p>
-          )}
 
-          {!errors[field.name] &&
-            touchedFields[field.name] &&
-            field.type !== 'file' && (
-              <p className="text-sm text-green-500">Valid Input</p>
+      {fields.map((field, index) => {
+  // ✅ HANDLE ROW LAYOUT
+  if (field.type === "row") {
+    return (
+      <div key={index} className="grid grid-cols-2 gap-4">
+        {field.fields.map((subField, subIndex) => (
+          <div key={subIndex} className="flex flex-col gap-1">
+            <label
+              htmlFor={subField.name}
+              className="font-medium text-sm text-white"
+            >
+              {subField.label}
+            </label>
+
+            {renderField(subField)}
+
+            {errors[subField.name] && (
+              <p className="text-sm text-red-500">
+                {errors[subField.name]?.message}
+              </p>
             )}
-        </div>
-      ))}
+
+            {!errors[subField.name] &&
+              touchedFields[subField.name] &&
+              subField.type !== "file" && (
+                <p className="text-sm text-green-500">Valid Input</p>
+              )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ✅ NORMAL FIELD
+  return (
+    <div key={index} className="flex flex-col gap-1">
+      <label htmlFor={field.name} className="font-medium text-sm text-white">
+        {field.label}
+      </label>
+
+      {renderField(field)}
+
+      {errors[field.name] && (
+        <p className="text-sm text-red-500">
+          {errors[field.name]?.message}
+        </p>
+      )}
+
+      {!errors[field.name] &&
+        touchedFields[field.name] &&
+        field.type !== "file" && (
+          <p className="text-sm text-green-500">Valid Input</p>
+        )}
+    </div>
+  );
+})}
 
       <button
         type="submit"
-        className={`w-full py-2 px-4 rounded-md font-semibold text-white 
+        className={`w-full mt-2 py-2 px-4 rounded-md font-semibold text-white 
           ${isValid ? 'bg-blue-800 hover:bg-blue-900' : 'bg-gray-600'}
         `}
       >
         {submitLabel}
       </button>
+            {/* API Error Display */}
+      {apiError && (
+        <div className="text-red-500 text-sm bg-red-100/10 p-2 rounded text-center mb-3">
+          {apiError}
+        </div>
+      )}
     </form>
   );
 };

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import Card from "./Card";
-import { useGetUserBudgetQuery } from "../store/features/budgetApi.js";
-import { Edit, X } from "lucide-react";
+import { useGetBudgetQuery } from "../store/features/budgetApi.js";
+import { Edit } from "lucide-react";
 import BudgetForm from "../Forms/BudgetForm.jsx";
 
 const SummaryCards = () => {
-  const { data, isLoading } = useGetUserBudgetQuery();
+  const { data, isLoading } = useGetBudgetQuery();
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
 
   const budget = data?.data?.budget || {};
@@ -77,16 +77,10 @@ const SummaryCards = () => {
       {isBudgetModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-lg w-[90%] sm:w-[480px] p-4 relative animate-fadeIn">
-            
-            {/* Close Button */}
-            <button
-              className="absolute top-3 right-3 text-gray-200 bg-red-500 rounded-md hover:text-white"
-              onClick={() => setIsBudgetModalOpen(false)}
-            >
-              <X size={20} />
-            </button>
-
-            <BudgetForm onSuccess={() => setIsBudgetModalOpen(false)} />
+            <BudgetForm
+              onSuccess={() => setIsBudgetModalOpen(false)}
+              onClose={() => setIsBudgetModalOpen(false)}
+            />
           </div>
         </div>
       )}

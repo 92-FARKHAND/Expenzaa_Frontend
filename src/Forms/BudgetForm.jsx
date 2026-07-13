@@ -1,14 +1,17 @@
 // src/components/BudgetForm.jsx
 
+import { useState } from "react";
 import Form from "../components/Form.jsx";
 import {
-  useGetUserBudgetQuery,
+  useGetBudgetQuery,
   useEditBudgetMutation,
 } from "../store/features/budgetApi.js";
+import { getErrorMessage } from "../utils/errorParser.js";
 
-const BudgetForm = ({ onSuccess }) => {
-  const { data, isLoading } = useGetUserBudgetQuery();
+const BudgetForm = ({ onSuccess, onClose }) => {
+  const { data, isLoading } = useGetBudgetQuery();
   const [editBudget, { isLoading: updating }] = useEditBudgetMutation();
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Extract budget fields
   const budget = data?.data?.budget || {};
@@ -21,13 +24,14 @@ const BudgetForm = ({ onSuccess }) => {
   };
 
   const handleSubmit = async (values) => {
+    setErrorMessage(""); // Clear previous errors
     try {
       await editBudget(values).unwrap();
       console.log("✅ Budget updated successfully");
 
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.log("❌ Error updating budget:", error);
+      setErrorMessage(getErrorMessage(error));
     }
   };
 
@@ -79,6 +83,8 @@ const BudgetForm = ({ onSuccess }) => {
         onSubmit={handleSubmit}
         defaultValues={defaultValues}
         submitLabel={updating ? "Saving..." : "Save Budget"}
+        onClose={onClose}
+        apiError={errorMessage}
       />
     </>
   );

@@ -82,7 +82,7 @@ const Card = ({
         {(chartType || image) && (
           <div
             className="flex-shrink-0 relative rounded-xl overflow-hidden
-                       w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32
+                       w-20 h-20 sm:w-24 sm:h-24 md:h-30
                        max-w-[8rem] max-h-[8rem]"
           >
 

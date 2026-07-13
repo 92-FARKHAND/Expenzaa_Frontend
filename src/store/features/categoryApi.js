@@ -9,27 +9,28 @@ export const categoryApi = api.injectEndpoints({
         }),
         invalidatesTags:['Category'],
      }),
-     getUserCategories : builder.query({
-        query:()=> '/category/categories',
-        transformResponse: (response) => response.data ?? [],
-        providesTags: (result = []) => [
-        'Category',
-        ...result.map((cat) => ({ type: 'Category', id: cat._id })),
-      ],
-     }),
-     deleteCategory : builder.mutation({
-        query:(categoryId)=>({
-         url:'/category/${categoryId}',
-         method:'DELETE'
-        }),
-        invalidatesTags:({categoryId})=>[{ type:'Category' , id:{categoryId}}]
-     })
+getCategories: builder.query({
+  query: () => "/category/categories",
+  transformResponse: (response) => response.data?.categories ?? [],
+  providesTags: (result = []) => [
+    { type: "Category", id: "LIST" },
+    ...result.map((cat) => ({ type: "Category", id: cat._id })),
+  ],
+}),
+
+deleteCategory: builder.mutation({
+  query: (categoryId) => ({
+    url: `/category/${categoryId}`,
+    method: "DELETE",
+  }),
+  invalidatesTags: ["Category"],
+}),
 
     })
 });
 
 export const {
     useCreateCategoryMutation,
-    useGetUserCategoriesQuery,
+    useGetCategoriesQuery,
     useDeleteCategoryMutation
 } = categoryApi

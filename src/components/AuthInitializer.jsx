@@ -1,26 +1,28 @@
-import { useLazyGetProfileQuery } from "../store/features/auth/authApi.js";
-import { useState, useEffect } from "react";
-import NotFoundPage from "../pages/public/NotFound.jsx"; // your 404 component
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Navigate, Outlet } from "react-router-dom";
+import {
+  selectIsAuthenticated,
+  selectAuthLoading,
+  selectRefreshFailed,
+} from "../store/features/auth/authSlice.js";
+import { useRefreshMutation } from "../store/features/auth/authApi.js";
 
 const AuthInitializer = ({ children }) => {
-  const [triggerProfile, { isLoading, isError }] = useLazyGetProfileQuery();
-  const [checkedAuth, setCheckedAuth] = useState(false);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isLoading = useSelector(selectAuthLoading);
+  const hasRefreshFailed = useSelector(selectRefreshFailed);
+
+  const [refresh] = useRefreshMutation();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await triggerProfile().unwrap(); // tries to fetch profile using cookie
-      } catch (_) {
-        // do nothing, just mark auth as failed
-      } finally {
-        setCheckedAuth(true);
-      }
-    };
+    if (!isAuthenticated) {
+      refresh();
+    }
+  }, []); // runs once on mount
 
-    checkAuth();
-  }, [triggerProfile]);
-
-  if (!checkedAuth || isLoading) {
+  // ⏳ Covers: initial load + silent refresh in progress
+  if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center text-white">
         Checking session...
@@ -28,11 +30,17 @@ const AuthInitializer = ({ children }) => {
     );
   }
 
-  if (isError) {
-    return <NotFoundPage />; // show 404 page if session is invalid
+  // ❌ Refresh token expired or invalid → go to login
+  if (hasRefreshFailed) {
+    return <Navigate to="/login" replace />;
   }
 
-  return children; // render children if authenticated
-};
+  // ✅ Authenticated → render app
+  if (isAuthenticated) {
+    return children ? children : <Outlet />;
+  }
 
-export default AuthInitializer;
+  // ⏳ Fallback: still waiting (shouldn't normally reach here)
+  return null;
+};
+export default AuthInitializer

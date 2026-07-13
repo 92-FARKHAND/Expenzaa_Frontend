@@ -10,6 +10,13 @@ export const subBudgetApi = api.injectEndpoints({
       }),
       providesTags: (result, error, categoryId) => [{ type: "SubBudget", id: categoryId }],
     }),
+    getAllSubBudget: builder.query({
+      query: () => ({
+        url: `/subBudget/getAllSubBudget`,
+        method: "GET",
+      }),
+      providesTags: (result, error, categoryId) => [{ type: "SubBudget", id: categoryId }],
+    }),
 
     // ✅ Set/update sub-budget for a specific category
     setSubBudget: builder.mutation({
@@ -18,10 +25,14 @@ export const subBudgetApi = api.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: (result, error, { categoryId }) => [{ type: "SubBudget", id: categoryId }],
+      invalidatesTags: (result, error, { categoryId }) => [
+        { type: "SubBudget", id: categoryId },
+        "Budget",      // ✅ Refreshes budget data
+        "Category",    // ✅ Refreshes category data
+      ],
     }),
   }),
 });
 
 // ✅ Export hooks for components
-export const { useGetSubBudgetQuery, useSetSubBudgetMutation } = subBudgetApi;
+export const { useGetSubBudgetQuery,useGetSubAllBudgetQuery, useSetSubBudgetMutation } = subBudgetApi;

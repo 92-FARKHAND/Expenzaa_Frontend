@@ -9,6 +9,7 @@ import Profile from "./pages/private/Profile.jsx";
 import AuthInitializer from "./components/AuthInitializer.jsx";
 import Categories from "./pages/private/Categories.jsx";
 import WelcomePage from "./pages/public/WelcomePage.jsx";
+import Organization from "./pages/private/Organization.jsx";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/organization" element={<Organization />} />
       </Route>
 
       {/* ------------------ Fallback ------------------ */}

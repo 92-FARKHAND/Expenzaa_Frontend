@@ -1,15 +1,22 @@
 import { useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
+import CategoryForm from "../../Forms/CategoryFrom.jsx";
 import Card from "../../components/Card.jsx";
 import SubBudgetForm from "../../Forms/SubBudgetForm.jsx";
 import {
-  useGetUserCategoriesQuery,
+  useGetCategoriesQuery,
+  useDeleteCategoryMutation
 } from "../../store/features/categoryApi.js";
 
 import { Pencil } from "lucide-react";
 
 const Categories = () => {
-  const { data: categories = [], isLoading, isError } = useGetUserCategoriesQuery();
-  const [editingCategory, setEditingCategory] = useState(null); // Track category being edited
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+const { data: categories = [], isLoading, isError } =
+  useGetCategoriesQuery();
+const [deleteCategory, { isLoading: isDeleting }] =
+  useDeleteCategoryMutation();
+    const [editingCategory, setEditingCategory] = useState(null); // Track category being edited
 
   const generateRandomColor = () => {
     const chars = "0123456789abcdef";
@@ -19,6 +26,23 @@ const Categories = () => {
     }
     return color;
   };
+
+  //Delete Category
+ const handleDelete = async (id) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this category?"
+  );
+
+  if (!confirmDelete) return;
+  try {
+    await deleteCategory(id).unwrap();
+    alert("Category deleted successfully.");
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete category.");
+  }
+};
+
 
   if (isLoading)
     return (
@@ -36,9 +60,29 @@ const Categories = () => {
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      <h2 className="text-xl font-semibold text-gray-100 mb-2">
+          <div className="flex items-center justify-between">
+      <h2 className="text-xl font-semibold text-gray-100">
         Insights by Category
       </h2>
+
+      <button
+        onClick={() => setShowCategoryForm(!showCategoryForm)}
+        className="flex items-center gap-2 px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+      >
+        <Plus size={18} />
+        Create Category
+      </button>
+    </div>
+
+
+      {showCategoryForm && (
+      <CategoryForm
+        onSuccess={() => {
+          setShowCategoryForm(false);
+        }}
+        onClose={() => setShowCategoryForm(false)}
+      />
+    )}
 
       <div className="flex flex-col gap-4">
         {categories.length === 0 ? (
@@ -55,19 +99,35 @@ const Categories = () => {
 
             return (
               <div key={_id} className="relative">
-                {/* Edit Icon */}
-                <button
-                  onClick={() => setEditingCategory(category)} // Open the form for this category
-                  className="absolute top-3 right-3 z-20 bg-gray-700 p-1 rounded-full hover:bg-gray-600 transition"
-                >
-                  <Pencil size={16} className="text-gray-200" />
-                </button>
+                <div className="absolute top-2 right-2 z-20 flex gap-2">
+                  {!category.isGeneral && (
+  <button
+    onClick={() => handleDelete(_id)}
+    className="bg-red-600 p-2 rounded-full hover:bg-red-700"
+    title="Delete Category"
+  >
+    <Trash2 size={13} className="text-white" />
+  </button>
+)}
+                 
+                   
+                   {/* Edit */}
+                   <button
+                     onClick={() => setEditingCategory(category)}
+                     className="bg-blue-600 p-2 rounded-full hover:bg-blue-700 transition"
+                     title="Edit Category"
+                   >
+                     <Pencil size={13} className="text-white" />
+                   </button>
+                 
+                 </div>
 
                 {/* If this category is being edited, show the form */}
                 {editingCategory?._id === _id ? (
                   <SubBudgetForm
                     category={editingCategory}
                     onSuccess={() => setEditingCategory(null)} // Close form after success
+                    onClose={() => setEditingCategory(null)} // Close form on X click
                   />
                 ) : (
                   <Card
