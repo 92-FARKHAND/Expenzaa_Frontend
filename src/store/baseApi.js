@@ -8,7 +8,7 @@ import { setAccessToken, logout } from "../store/features/auth/authSlice";
 */
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "/api", // or import.meta.env.VITE_API_URL
+  baseUrl:  import.meta.env.API_URL,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.accessToken;
