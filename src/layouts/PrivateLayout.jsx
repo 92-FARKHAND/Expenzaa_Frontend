@@ -1,164 +1,216 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
-//AlertCircle removed
-import { Menu, X, User, PlusCircle, ChevronDown, Loader, Building2  } from "lucide-react";
+import {
+  Menu,
+  X,
+  User,
+  PlusCircle,
+  ChevronDown,
+  Loader,
+} from "lucide-react";
+
 import { getErrorMessage } from "../utils/errorParser.js";
 import ExpenseForm from "../Forms/ExpenseForm.jsx";
 import OrgForm from "../Forms/CreateOrgForm.jsx";
 import ProfileMenu from "../components/ProfileMenu";
+
 import {
   useGetUserOrganizationsQuery,
 } from "../store/features/organizationApi.js";
-//  useCreateOrganizationMutation,
+
 import { useLazyExportExpensesQuery } from "../store/features/expenseApi.js";
+
 import {
-  selectIsAuthenticated,
-  selectAuthLoading,
   selectUserContext,
 } from "../store/features/auth/authSlice.js";
+
 import { useSwitchContextMutation } from "../store/features/auth/authApi.js";
 
+
 const PrivateLayout = () => {
-  // ========================
-  // 🔹 REDUX STATE
-  // ========================
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const authLoading = useSelector(selectAuthLoading);
+
   const navigate = useNavigate();
+
 
   // ========================
   // 🔹 LOCAL STATE
   // ========================
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [isOrgDropdownOpen, setIsOrgDropdownOpen] = useState(false);
   const [showCreateOrgForm, setShowCreateOrgForm] = useState(false);
 
+
   const profileRef = useRef(null);
   const orgDropdownRef = useRef(null);
 
-  // ========================
-  // 🔹 FETCH ORGANIZATIONS
-  // ========================
-  const { data: orgsResponse, isLoading: orgsLoading } = useGetUserOrganizationsQuery();
-  const organizations = orgsResponse?.data || [];
-  
 
   // ========================
-  // 🔹 CONTEXT SWITCHING STATE & HANDLER
+  // 🔹 ORGANIZATIONS
   // ========================
+
+  const {
+    data: orgsResponse,
+    isLoading: orgsLoading,
+  } = useGetUserOrganizationsQuery();
+
+
+  const organizations = orgsResponse?.data || [];
+
+
+  // ========================
+  // 🔹 USER CONTEXT
+  // ========================
+
   const currentContext = useSelector(selectUserContext);
-  const [switchContext, { isLoading: isSwitching }] = useSwitchContextMutation();
+
+
+  const [
+    switchContext,
+    {
+      isLoading: isSwitching
+    }
+  ] = useSwitchContextMutation();
+
+
 
   const handleSwitchContext = async (e, organizationId) => {
+
     e.stopPropagation();
+
     try {
+
       if (organizationId) {
-        await switchContext({ organizationId }).unwrap();
+        await switchContext({
+          organizationId
+        }).unwrap();
+
       } else {
+
         await switchContext({}).unwrap();
+
       }
-    } catch (err) {
-      console.error("Failed to switch context:", getErrorMessage(err));
+
+    } catch(err) {
+
+      console.error(
+        "Failed to switch context:",
+        getErrorMessage(err)
+      );
+
     }
+
   };
 
-  // ========================
-  // 🔹 REDIRECT IF NOT AUTHENTICATED
-  // ========================
-  useEffect(() => {
-    // Only redirect if we've finished loading auth state
-    // and user is NOT authenticated
-    if (!authLoading && !isAuthenticated) {
-      navigate("/login", { replace: true });
-    }
-  }, [isAuthenticated, authLoading, navigate]);
+
 
   // ========================
-  // 🔹 NAVIGATION LINKS
+  // 🔹 CLOSE MENUS
   // ========================
-  const navLinks = [
-    { name: "Dashboard", to: "/dashboard" },
-    { name: "Expenses", to: "/expenses" },
-    { name: "Categories", to: "/categories" },
-  ];
 
-  // ========================
-  // 🔹 CLOSE MENUS ON OUTSIDE CLICK
-  // ========================
   useEffect(() => {
+
     const handleClickOutside = (e) => {
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
+
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(e.target)
+      ) {
         setIsProfileOpen(false);
       }
-      if (orgDropdownRef.current && !orgDropdownRef.current.contains(e.target)) {
+
+
+      if (
+        orgDropdownRef.current &&
+        !orgDropdownRef.current.contains(e.target)
+      ) {
         setIsOrgDropdownOpen(false);
       }
+
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+
+
   }, []);
 
+
+
   // ========================
-  // 🔹 HANDLE ORGANIZATION CLICK
+  // 🔹 NAVIGATION
   // ========================
+
   const handleOrgClick = (organizationId) => {
+
     navigate(`/organization?id=${organizationId}`);
+
     setIsOrgDropdownOpen(false);
     setIsSidebarOpen(false);
+
   };
 
-  // ========================
-  // 🔹 SHOW LOADING SCREEN IF STILL LOADING
-  // ========================
-  if (authLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gray-900">
-        <div className="text-center">
-          <Loader className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-400">Loading application...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   // ========================
-  // 🔹 IF NOT AUTHENTICATED, DON'T RENDER (redirect happens above)
+  // 🔹 EXPORT
   // ========================
-  if (!isAuthenticated) {
-    return null; // Redirect already triggered, don't render anything
-  }
 
-  // Handle Export
-const [triggerExport, { isLoading }] = useLazyExportExpensesQuery();
-const handleExport = async () => {
-  await triggerExport().unwrap(); // download happens inside responseHandler
-};
-// const handleExport = async () => {
-//   const fileBlob = await triggerExport().unwrap();
+  const [
+    triggerExport,
+    {
+      isLoading: exportLoading
+    }
+  ] = useLazyExportExpensesQuery();
 
-//   const url = window.URL.createObjectURL(fileBlob);
 
-//   const link = document.createElement("a");
 
-//   link.href = url;
+  const handleExport = async () => {
 
-//   link.download = "monthly-expenses.xlsx";
+    await triggerExport().unwrap();
 
-//   document.body.appendChild(link);
+  };
 
-//   link.click();
 
-//   link.remove();
-
-//   window.URL.revokeObjectURL(url);
-// };
 
   // ========================
-  // 🔹 RENDER MAIN LAYOUT
+  // 🔹 NAV LINKS
   // ========================
+
+  const navLinks = [
+    {
+      name: "Dashboard",
+      to: "/dashboard"
+    },
+    {
+      name: "Expenses",
+      to: "/expenses"
+    },
+    {
+      name: "Categories",
+      to: "/categories"
+    },
+  ];
+
+
+
+  // ========================
+  // 🔹 RENDER
+  // ========================
+
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-gray-200 overflow-hidden">
       {/* ==================== HEADER ==================== */}
@@ -378,7 +430,10 @@ const handleExport = async () => {
         </main>
       </div>
     </div>
+
   );
 };
 
+
 export default PrivateLayout;
+
