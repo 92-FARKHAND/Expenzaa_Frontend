@@ -1,46 +1,66 @@
 import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
+
 import {
   selectIsAuthenticated,
   selectAuthLoading,
   selectRefreshFailed,
 } from "../store/features/auth/authSlice.js";
+
 import { useRefreshMutation } from "../store/features/auth/authApi.js";
 
-const AuthInitializer = ({ children }) => {
+
+const AuthInitializer = () => {
+
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isLoading = useSelector(selectAuthLoading);
-  const hasRefreshFailed = useSelector(selectRefreshFailed);
+  const refreshFailed = useSelector(selectRefreshFailed);
+
 
   const [refresh] = useRefreshMutation();
 
+
+
   useEffect(() => {
-    if (!isAuthenticated) {
+
+    // only attempt refresh during initial app boot
+    if (
+      isLoading &&
+      !isAuthenticated &&
+      !refreshFailed
+    ) {
       refresh();
     }
-  }, []); // runs once on mount
 
-  // ⏳ Covers: initial load + silent refresh in progress
+  }, [
+    isLoading,
+    isAuthenticated,
+    refreshFailed,
+    refresh
+  ]);
+
+
+
+
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center text-white">
+      <div className="h-screen flex items-center justify-center">
         Checking session...
       </div>
     );
   }
 
-  // ❌ Refresh token expired or invalid → go to login
-  if (hasRefreshFailed) {
+
+
+  if (refreshFailed) {
     return <Navigate to="/login" replace />;
   }
 
-  // ✅ Authenticated → render app
-  if (isAuthenticated) {
-    return children ? children : <Outlet />;
-  }
 
-  // ⏳ Fallback: still waiting (shouldn't normally reach here)
-  return null;
+
+  return isAuthenticated ? <Outlet /> : null;
 };
-export default AuthInitializer
+
+
+export default AuthInitializer;

@@ -87,8 +87,8 @@ refresh: builder.mutation({
 
     try {
       const { data } = await queryFulfilled;
-      dispatch(setAccessToken(data.accessToken));
-      dispatch(setUser(data.user)); // if your endpoint returns user too
+      dispatch(setAccessToken(data.data.accessToken));
+      dispatch(setUser(data.data.user)); // if your endpoint returns user too
     } catch {
       // ✅ Signal failure so the router redirects to /login
       dispatch(refreshFailedAction()); // rename import to avoid conflict with selector
