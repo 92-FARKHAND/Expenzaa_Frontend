@@ -21,21 +21,23 @@ const authSlice = createSlice({
     },
 
     setAccessToken: (state, action) => {
-      state.accessToken = action.payload;
-    },
+  state.accessToken = action.payload;
+  state.initialized = true;
+},
 
-    setUser: (state, action) => {
-      const user = action.payload;
+setUser: (state, action) => {
+  const user = action.payload;
 
-      if (user && !user.currentContext) {
-        user.currentContext = {
-          type: "solo",
-          organizationId: null,
-        };
-      }
+  if (user && !user.currentContext) {
+    user.currentContext = {
+      type: "solo",
+      organizationId: null,
+    };
+  }
 
-      state.user = user;
-    },
+  state.user = user;
+  state.initialized = true;
+},
 
     initializeComplete: (state) => {
       state.initialized = true;
