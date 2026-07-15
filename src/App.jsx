@@ -6,13 +6,15 @@ import AuthForm from "./pages/public/AuthForm.jsx";
 import Dashboard from "./pages/private/Dashborad.jsx";
 import Expenses from "./pages/private/Expenses.jsx";
 import Profile from "./pages/private/Profile.jsx";
-import AuthInitializer from "./components/AuthInitializer.jsx";
+import AuthBootstrap from "./components/AuthBootstrap";
+import RequireAuth from "./components/RequireAuth";
 import Categories from "./pages/private/Categories.jsx";
 import WelcomePage from "./pages/public/WelcomePage.jsx";
 import Organization from "./pages/private/Organization.jsx";
 
 function App() {
   return (
+    <AuthBootstrap>
     <Routes>
       {/* ------------------ Public Routes ------------------ */}
       <Route element={<PublicLayout />}>
@@ -22,23 +24,23 @@ function App() {
       </Route>
 
       {/* ------------------ Private Routes ------------------ */}
-      <Route
-        element={
-          <AuthInitializer>
-            <PrivateLayout />
-          </AuthInitializer>
-        }
-      >
-        <Route path="/dashboard" element={<Dashboard />} />
+      <Route element={<RequireAuth />}>
+          <Route element={<PrivateLayout />}>
+            <Route
+              path="/dashboard"
+              element={<Dashboard />}
+            />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/organization" element={<Organization />} />
       </Route>
+      </Route>
 
       {/* ------------------ Fallback ------------------ */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </AuthBootstrap>
   );
 }
 

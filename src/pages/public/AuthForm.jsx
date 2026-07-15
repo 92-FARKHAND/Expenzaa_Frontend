@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AlertCircle, Loader } from "lucide-react";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated } from "../../store/features/auth/authSlice";
 
 import Form from "../../components/Form.jsx";
 
@@ -14,6 +16,8 @@ import { getErrorMessage } from "../../utils/errorParser.js";
 
 
 const AuthForm = () => {
+
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -129,108 +133,62 @@ const AuthForm = () => {
       ];
 
 
-
+useEffect(() => {
+    if (isAuthenticated) {
+        navigate("/dashboard", {
+            replace: true,
+        });
+    }
+}, [isAuthenticated, navigate]);
 
   const handleSubmit = async (data) => {
-
     setErrorMessage("");
     setSuccessMessage("");
 
-
     try {
-
-
       if (isSignUp) {
-
-
         const formData = new FormData();
-
-
         formData.append(
           "username",
           data.username.trim().toLowerCase()
         );
-
-
         formData.append(
           "email",
           data.email.trim().toLowerCase()
         );
-
-
         formData.append(
           "fullName",
           data.fullName.trim()
         );
-
-
         formData.append(
           "password",
           data.password
         );
-
-
         formData.append(
           "role",
           "user"
         );
-
-
         if (data.avatar?.[0]) {
           formData.append(
             "avatar",
             data.avatar[0]
           );
         }
-
-
-
         await signup(formData).unwrap();
-
-
-
         reset();
-
-
         setSuccessMessage(
           "Account created! Redirecting..."
         );
 
-
-        navigate(
-          "/dashboard",
-          {
-            replace: true
-          }
-        );
-
-
       } else {
 
-
-
         await login({
-
           username:
             data.username.trim().toLowerCase(),
-
           password:
             data.password,
-
         }).unwrap();
-
-
-
         reset();
-
-
-
-        navigate(
-          "/dashboard",
-          {
-            replace:true
-          }
-        );
 
       }
 
@@ -251,9 +209,6 @@ const AuthForm = () => {
     }
 
   };
-
-
-
 
   const isLoading =
     loginLoading ||

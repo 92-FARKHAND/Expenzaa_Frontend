@@ -1,73 +1,92 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { setAccessToken, logout } from "../store/features/auth/authSlice";
 
-/*
-  1️⃣ Base Query
-  - Attaches access token to headers
-  - Includes cookies for refresh token
-*/
+import {
+  logout,
+  setAccessToken,
+  setUser,
+} from "./features/auth/authSlice";
 
 const baseQuery = fetchBaseQuery({
-baseUrl:  import.meta.env.VITE_API_URL +"/api",
+  baseUrl: import.meta.env.VITE_API_URL + "/api",
   credentials: "include",
+
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.accessToken;
 
     if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+      headers.set("Authorization", `Bearer ${token}`);
     }
 
     return headers;
   },
 });
 
-/*
-  2️⃣ Wrapped Query (Interceptor Equivalent)
-  - Handles 401
-  - Calls refresh
-  - Retries original request
-  - Logs out if refresh fails
-*/
+let refreshPromise = null;
 
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  if (result?.error?.status === 401) {
-    // Attempt refresh
-    const refreshResult = await baseQuery(
+  if (result?.error?.status !== 401) {
+    return result;
+  }
+
+  // don't refresh while logging in
+  if (
+    typeof args === "object" &&
+    (
+      args.url === "/user/login" ||
+      args.url === "/user/register" ||
+      args.url === "/user/auth/refresh"
+    )
+  ) {
+    return result;
+  }
+
+  if (!refreshPromise) {
+    refreshPromise = baseQuery(
       {
-        url: "/auth/refresh",
+        url: "/user/auth/refresh",
         method: "POST",
       },
       api,
       extraOptions
     );
+  }
 
-    if (refreshResult?.data) {
-      // Store new access token
-      api.dispatch(setAccessToken(refreshResult.data.accessToken));
+  const refreshResult = await refreshPromise;
 
-      // Retry original request
-      result = await baseQuery(args, api, extraOptions);
-    } else {
-      // Refresh failed → logout
-      api.dispatch(logout());
+  refreshPromise = null;
 
-      // Redirect to home
-      window.location.replace("/");
-    }
+  if (refreshResult.data) {
+    api.dispatch(
+      setAccessToken(
+        refreshResult.data.data.accessToken
+      )
+    );
+
+    api.dispatch(
+      setUser(
+        refreshResult.data.data.user
+      )
+    );
+
+    result = await baseQuery(
+      args,
+      api,
+      extraOptions
+    );
+  } else {
+    api.dispatch(logout());
   }
 
   return result;
 };
 
-/*
-  3️⃣ Create API
-*/
-
 export const api = createApi({
   reducerPath: "api",
+
   baseQuery: baseQueryWithReauth,
+
   tagTypes: [
     "User",
     "Expense",
@@ -76,5 +95,105 @@ export const api = createApi({
     "Organization",
     "SubBudget",
   ],
+
+  endpoints: () => ({}),
+});import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+import {
+  logout,
+  setAccessToken,
+  setUser,
+} from "./features/auth/authSlice";
+
+const baseQuery = fetchBaseQuery({
+  baseUrl: import.meta.env.VITE_API_URL + "/api",
+  credentials: "include",
+
+  prepareHeaders: (headers, { getState }) => {
+    const token = getState().auth.accessToken;
+
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    return headers;
+  },
+});
+
+let refreshPromise = null;
+
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+
+  if (result?.error?.status !== 401) {
+    return result;
+  }
+
+  // don't refresh while logging in
+  if (
+    typeof args === "object" &&
+    (
+      args.url === "/user/login" ||
+      args.url === "/user/register" ||
+      args.url === "/user/auth/refresh"
+    )
+  ) {
+    return result;
+  }
+
+  if (!refreshPromise) {
+    refreshPromise = baseQuery(
+      {
+        url: "/user/auth/refresh",
+        method: "POST",
+      },
+      api,
+      extraOptions
+    );
+  }
+
+  const refreshResult = await refreshPromise;
+
+  refreshPromise = null;
+
+  if (refreshResult.data) {
+    api.dispatch(
+      setAccessToken(
+        refreshResult.data.data.accessToken
+      )
+    );
+
+    api.dispatch(
+      setUser(
+        refreshResult.data.data.user
+      )
+    );
+
+    result = await baseQuery(
+      args,
+      api,
+      extraOptions
+    );
+  } else {
+    api.dispatch(logout());
+  }
+
+  return result;
+};
+
+export const api = createApi({
+  reducerPath: "api",
+
+  baseQuery: baseQueryWithReauth,
+
+  tagTypes: [
+    "User",
+    "Expense",
+    "Budget",
+    "Category",
+    "Organization",
+    "SubBudget",
+  ],
+
   endpoints: () => ({}),
 });
