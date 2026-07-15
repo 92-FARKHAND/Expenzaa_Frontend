@@ -78,7 +78,7 @@ signup: builder.mutation({
 // In authApi.js
 refresh: builder.mutation({
   query: () => ({
-    url: "/auth/refresh",
+    url: "/user/auth/refresh",
     method: "POST",
   }),
   async onQueryStarted(_, { dispatch, queryFulfilled }) {
