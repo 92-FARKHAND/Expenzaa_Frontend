@@ -3,17 +3,44 @@ import { useSelector } from "react-redux";
 
 import {
   selectIsAuthenticated,
+  selectInitialized,
 } from "../store/features/auth/authSlice";
+
 
 const RequireAuth = () => {
 
   const location = useLocation();
 
-  const authenticated = useSelector(
-    selectIsAuthenticated
-  );
+
+  const authenticated =
+    useSelector(selectIsAuthenticated);
+
+
+  const initialized =
+    useSelector(selectInitialized);
+
+
+
+  if (!initialized) {
+
+    return (
+      <div className="
+        h-screen
+        flex
+        items-center
+        justify-center
+        text-white
+      ">
+        Checking authentication...
+      </div>
+    );
+
+  }
+
+
 
   if (!authenticated) {
+
     return (
       <Navigate
         to="/login"
@@ -23,9 +50,14 @@ const RequireAuth = () => {
         }}
       />
     );
+
   }
 
+
+
   return <Outlet />;
+
 };
+
 
 export default RequireAuth;
