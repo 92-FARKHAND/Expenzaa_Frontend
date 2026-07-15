@@ -4,6 +4,7 @@ const initialState = {
   accessToken: null,
   user: null,
   isAuthenticated: false,
+  initialising:false,
   isLoading: true, // ✅ Start true — app checks tokens on mount
   isRefreshing: false, // ✅ Tracks silent refresh in progress
   refreshFailed: false, // ✅ True when refresh token is expired/missing → triggers redirect to /login

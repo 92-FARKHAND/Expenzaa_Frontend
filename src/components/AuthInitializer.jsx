@@ -19,26 +19,22 @@ const AuthInitializer = () => {
 
 
   const [refresh] = useRefreshMutation();
-
-
+  const initializing = useSelector(selectInitializing);
 
   useEffect(() => {
-
-    // only attempt refresh during initial app boot
     if (
-      isLoading &&
-      !isAuthenticated &&
-      !refreshFailed
+        initializing &&
+        !isAuthenticated &&
+        !refreshFailed
     ) {
-      refresh();
+        refresh();
     }
-
-  }, [
-    isLoading,
+}, [
+    initializing,
     isAuthenticated,
     refreshFailed,
     refresh
-  ]);
+]);
 
 
 
