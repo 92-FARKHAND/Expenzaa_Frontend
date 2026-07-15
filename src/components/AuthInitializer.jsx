@@ -5,6 +5,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import {
   selectIsAuthenticated,
   selectAuthLoading,
+  selectInitializing,
   selectRefreshFailed,
 } from "../store/features/auth/authSlice.js";
 

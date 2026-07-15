@@ -104,6 +104,7 @@ export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectAuthLoading = (state) => state.auth.isLoading;
 export const selectIsRefreshing = (state) => state.auth.isRefreshing;
 export const selectRefreshFailed = (state) => state.auth.refreshFailed; // ✅ Used by router to redirect → /login
+export const selectInitializing = (state) => state.auth.initializing;
 export const selectUserContext = (state) =>
   state.auth.user?.currentContext || { type: "solo", organizationId: null };
 export const selectIsOrganizationMode = (state) =>
