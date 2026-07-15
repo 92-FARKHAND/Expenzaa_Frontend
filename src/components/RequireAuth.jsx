@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import {
   selectIsAuthenticated,
   selectInitialized,
+  selectCurrentUser,
 } from "../store/features/auth/authSlice";
 
 
@@ -18,7 +19,15 @@ const RequireAuth = () => {
 
   const initialized =
     useSelector(selectInitialized);
+    const user = useSelector(selectCurrentUser);
 
+      console.log(
+    "RequireAuth:",
+    {
+      authenticated,
+      user
+    }
+  );
 
 
   if (!initialized) {
@@ -40,6 +49,9 @@ const RequireAuth = () => {
 
 
   if (!authenticated) {
+        console.log(
+      "Redirecting to login"
+    );
 
     return (
       <Navigate
