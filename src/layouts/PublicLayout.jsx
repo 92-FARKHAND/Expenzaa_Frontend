@@ -7,7 +7,7 @@ const PublicLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 text-gray-200"
      style={{
-         backgroundImage:"linear-gradient(rgba(17,17,17,0.7), rgba(17,17,17,0.7)), url('/src/assets/bg.jpg')",
+         backgroundImage:"linear-gradient(rgba(17,17,17,0.7), rgba(17,17,17,0.7)), url('/public/bg.jpg')",
       }}
     >
       {/* ===== Header ===== */}
