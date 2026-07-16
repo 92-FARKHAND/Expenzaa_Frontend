@@ -1,13 +1,13 @@
 import { Outlet } from "react-router-dom";
 import { useState } from "react";
-
+import bg from "../../public/bg.jpg"
 const PublicLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 text-gray-200"
      style={{
-         backgroundImage:"linear-gradient(rgba(17,17,17,0.7), rgba(17,17,17,0.7)), url('/public/bg.jpg')",
+         backgroundImage:`linear-gradient(rgba(17,17,17,0.7), rgba(17,17,17,0.7)), url(${bg})`,
       }}
     >
       {/* ===== Header ===== */}
