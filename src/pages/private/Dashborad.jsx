@@ -18,13 +18,11 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const Dashboard = () => {
   // 🔹 Redux placeholder (replace with your slice later)
-  // const { budgets, expenses } = useSelector((state) => state.finance);
   const { data: expenses = [], isLoading, isError } = useGetExpensesQuery();
   const { data: expensesMon = [] } = useGetMonthlyExpensesQuery();
   const visibleExpenses = expenses.slice(0, 3);
 
 const chartData = expensesMon.map((expense)=>{return expense.amount;})
-console.log(expenses);
   // 🔹 Chart Data
   const monthlyExpenseData = {
     labels: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],

@@ -39,6 +39,7 @@ setUser: (state, action) => {
   state.initialized = true;
 },
 
+// remove it later as not used
     initializeComplete: (state) => {
       state.initialized = true;
     },
