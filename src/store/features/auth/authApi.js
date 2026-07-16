@@ -4,6 +4,8 @@ import {
   setCredentials,
   logout,
   updateUserContext,
+  setAccessToken,
+  setUser
 } from "./authSlice";
 
 export const authApi = api.injectEndpoints({
@@ -73,19 +75,33 @@ export const authApi = api.injectEndpoints({
       invalidatesTags: ["User"],
     }),
 
-    /*
-    ====================================
-    PROFILE
-    ====================================
-    */
+    //  getProfile
+   getProfile: builder.query({
+  query: () => ({ url: "/user/profile" }),
+  providesTags: ["User"],
+  async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+    try {
+      const { data } = await queryFulfilled;
+      dispatch(setUser(data.data)); // response IS the user object
+    } catch (err) {
+      console.error(err);
+    }
+  },
+}),
 
-    getProfile: builder.query({
-      query: () => ({
-        url: "/user/profile",
-      }),
-
-      providesTags: ["User"],
-    }),
+//  Update Prfile
+updateProfile: builder.mutation({
+  query: (body) => ({ url: "/user/update-profile", method: "PATCH", body }),
+  invalidatesTags: ["User"],
+  async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+    try {
+      const { data } = await queryFulfilled;
+      dispatch(setUser(data.data));
+    } catch (err) {
+      console.error(err);
+    }
+  },
+}),
 
     /*
     ====================================
@@ -129,21 +145,6 @@ export const authApi = api.injectEndpoints({
       }),
     }),
 
-    /*
-    ====================================
-    UPDATE PROFILE
-    ====================================
-    */
-
-    updateProfile: builder.mutation({
-      query: (body) => ({
-        url: "/user/update-profile",
-        method: "PATCH",
-        body,
-      }),
-
-      invalidatesTags: ["User"],
-    }),
 
     /*
     ====================================
@@ -188,37 +189,32 @@ export const authApi = api.injectEndpoints({
     ====================================
     */
 
-    switchContext: builder.mutation({
-      query: (body) => ({
-        url: "/user/switch-context",
-        method: "POST",
-        body,
-      }),
+switchContext: builder.mutation({
+  query: (body) => ({
+    url: "/user/switch-context",
+    method: "POST",
+    body,
+  }),
 
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
+  async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+    try {
+      const { data } = await queryFulfilled;
 
-          dispatch(
-            updateUserContext({
-              type: data.data.context,
-              organizationId: data.data.organizationId,
-            })
-          );
+      dispatch(setAccessToken(data.data.accessToken)); // ✅ new token now takes effect immediately
 
-        } catch (err) {
-          console.error(err);
-        }
-      },
+      dispatch(
+        updateUserContext({
+          type: data.data.context.type,                 // ✅ unwrap nested object
+          organizationId: data.data.context.organizationId,
+        })
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  },
 
-      invalidatesTags: [
-        "User",
-        "Expense",
-        "Budget",
-        "Category",
-        "SubBudget",
-      ],
-    }),
+  invalidatesTags: ["User", "Expense", "Budget", "Category", "SubBudget"],
+}),
 
   }),
 });
