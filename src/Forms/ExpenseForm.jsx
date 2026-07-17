@@ -11,14 +11,14 @@ import {
   useCreateCategoryMutation,
   useDeleteCategoryMutation,
 } from "../store/features/categoryApi.js";
-import { selectCurrentUser } from "../store/features/auth/authSlice.js";
+import { selectUser } from "../store/features/auth/authSlice.js";
 import { getErrorMessage } from "../utils/errorParser.js";
 
 const ExpenseForm = ({ defaultValues = {}, mode, onSuccess, onClose }) => {
   const isEdit = mode === "edit" || !!defaultValues?._id;
   
   // Get user from Redux
-  const user = useSelector(selectCurrentUser);
+  const user = useSelector(selectUser);
 
   const [createExpense, { isLoading: creating }] = useCreateExpenseMutation();
   const [editExpense, { isLoading: editing }] = useEditExpenseMutation();

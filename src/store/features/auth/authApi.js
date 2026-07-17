@@ -11,7 +11,6 @@ import { api } from "../../baseApi";
 import {
   setUser,
   logout,
-  updateUserContext,
 } from "./authSlice";
 
 export const authApi = api.injectEndpoints({
@@ -206,13 +205,8 @@ switchContext: builder.mutation({
       const { data } = await queryFulfilled;
 
       // dispatch(setAccessToken(data.data.accessToken)); // ✅ new token now takes effect immediately
+      dispatch(setUser(data.data));
 
-      dispatch(
-        updateUserContext({
-          type: data.data.context.type,                 // ✅ unwrap nested object
-          organizationId: data.data.context.organizationId,
-        })
-      );
     } catch (err) {
       console.error(err);
     }

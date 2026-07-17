@@ -22,7 +22,7 @@ import {
 import { useLazyExportExpensesQuery } from "../store/features/expenseApi.js";
 
 import {
-  selectUserContext,
+  selectUser,
 } from "../store/features/auth/authSlice.js";
 
 import { useSwitchContextMutation } from "../store/features/auth/authApi.js";
@@ -71,7 +71,7 @@ const PrivateLayout = () => {
   // 🔹 USER CONTEXT
   // ========================
 
-  const currentContext = useSelector(selectUserContext);
+  const {currentContext} = useSelector(selectUser);
 
 
   const [

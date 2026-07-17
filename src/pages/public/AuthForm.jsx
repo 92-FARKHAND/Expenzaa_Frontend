@@ -3,8 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AlertCircle, Loader } from "lucide-react";
 import { useSelector } from "react-redux";
-import { selectIsAuthenticated } from "../../store/features/auth/authSlice";
-
+import { selectUser } from "../../store/features/auth/authSlice";
 import Form from "../../components/Form.jsx";
 
 import {
@@ -17,8 +16,7 @@ import { getErrorMessage } from "../../utils/errorParser.js";
 
 const AuthForm = () => {
 
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-
+const user = useSelector(selectUser);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -134,12 +132,12 @@ const AuthForm = () => {
 
 
 useEffect(() => {
-    if (isAuthenticated) {
-        navigate("/dashboard", {
-            replace: true,
-        });
-    }
-}, [isAuthenticated, navigate]);
+  if (user) {
+    navigate("/dashboard", {
+      replace: true,
+    });
+  }
+}, [user, navigate]);
 
   const handleSubmit = async (data) => {
     setErrorMessage("");
