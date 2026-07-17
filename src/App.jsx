@@ -14,7 +14,6 @@ import Organization from "./pages/private/Organization.jsx";
 
 function App() {
   return (
-    <AuthBootstrap>
     <Routes>
       {/* ------------------ Public Routes ------------------ */}
       <Route element={<PublicLayout />}>
@@ -24,7 +23,6 @@ function App() {
       </Route>
 
       {/* ------------------ Private Routes ------------------ */}
-      <Route element={<RequireAuth />}>
           <Route element={<PrivateLayout />}>
             <Route
               path="/dashboard"
@@ -35,12 +33,10 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/organization" element={<Organization />} />
       </Route>
-      </Route>
 
       {/* ------------------ Fallback ------------------ */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-    </AuthBootstrap>
   );
 }
 
