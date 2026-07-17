@@ -1,11 +1,17 @@
 import { api } from "../../baseApi";
 
+// import {
+//   setCredentials,
+//   logout,
+//   updateUserContext,
+//   setAccessToken,
+//   setUser
+// } from "./authSlice";
+
 import {
-  setCredentials,
+  setUser,
   logout,
   updateUserContext,
-  setAccessToken,
-  setUser
 } from "./authSlice";
 
 export const authApi = api.injectEndpoints({
@@ -27,13 +33,13 @@ export const authApi = api.injectEndpoints({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-
-          dispatch(
-            setCredentials({
-              accessToken: data.data.accessToken,
-              user: data.data.user,
-            })
-          );
+          dispatch(setUser(data.data.user));
+                   //  dispatch(
+//   setCredentials({
+//     accessToken: data.data.accessToken,
+//     user: data.data.user,
+//   })
+// );
 
         } catch (err) {
           console.error(err);
@@ -59,14 +65,13 @@ export const authApi = api.injectEndpoints({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-
-          dispatch(
-            setCredentials({
-              accessToken: data.data.accessToken,
-              user: data.data.user,
-            })
-          );
-
+           dispatch(setUser(data.data.user));
+//            dispatch(
+//   setCredentials({
+//     accessToken: data.data.accessToken,
+//     user: data.data.user,
+//   })
+// );
         } catch (err) {
           console.error(err);
         }
@@ -82,8 +87,8 @@ export const authApi = api.injectEndpoints({
   async onQueryStarted(arg, { dispatch, queryFulfilled }) {
     try {
       const { data } = await queryFulfilled;
-      dispatch(setUser(data.data)); // response IS the user object
-    } catch (err) {
+       dispatch(setUser(data.data));    
+      } catch (err) {
       console.error(err);
     }
   },
@@ -200,7 +205,7 @@ switchContext: builder.mutation({
     try {
       const { data } = await queryFulfilled;
 
-      dispatch(setAccessToken(data.data.accessToken)); // ✅ new token now takes effect immediately
+      // dispatch(setAccessToken(data.data.accessToken)); // ✅ new token now takes effect immediately
 
       dispatch(
         updateUserContext({

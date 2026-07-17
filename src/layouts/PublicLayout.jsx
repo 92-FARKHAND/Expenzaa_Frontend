@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { useState } from "react";
-import bg from "../../public/bg.jpg"
+import bg from "/bg.jpg"
 const PublicLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 

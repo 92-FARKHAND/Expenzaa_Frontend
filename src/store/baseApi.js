@@ -2,23 +2,12 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import {
   logout,
-  setAccessToken,
   setUser,
 } from "./features/auth/authSlice";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL + "/api",
-  credentials: "include",
-
-  prepareHeaders: (headers, { getState }) => {
-    const token = getState().auth.accessToken;
-
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-
-    return headers;
-  },
+  credentials: "include", // Sends HttpOnly cookies automatically
 });
 
 let refreshPromise = null;
@@ -26,11 +15,12 @@ let refreshPromise = null;
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
+  // If request succeeded, return it
   if (result?.error?.status !== 401) {
     return result;
   }
 
-  // don't refresh while logging in
+  // Don't try to refresh while authenticating
   if (
     typeof args === "object" &&
     (
@@ -42,6 +32,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     return result;
   }
 
+  // Prevent multiple refresh requests at the same time
   if (!refreshPromise) {
     refreshPromise = baseQuery(
       {
@@ -54,27 +45,16 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
   }
 
   const refreshResult = await refreshPromise;
-
   refreshPromise = null;
 
   if (refreshResult.data) {
-    api.dispatch(
-      setAccessToken(
-        refreshResult.data.data.accessToken
-      )
-    );
+    // Optional: if refresh endpoint returns the updated user
+    if (refreshResult.data.data?.user) {
+      api.dispatch(setUser(refreshResult.data.data.user));
+    }
 
-    api.dispatch(
-      setUser(
-        refreshResult.data.data.user
-      )
-    );
-
-    result = await baseQuery(
-      args,
-      api,
-      extraOptions
-    );
+    // Retry the original request
+    result = await baseQuery(args, api, extraOptions);
   } else {
     api.dispatch(logout());
   }
@@ -84,7 +64,6 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
 export const api = createApi({
   reducerPath: "api",
-
   baseQuery: baseQueryWithReauth,
 
   tagTypes: [
@@ -99,8 +78,117 @@ export const api = createApi({
   endpoints: () => ({}),
 });
 
-// Used only for initial authentication check
+// Optional: use this for initial auth checks if needed
 export const rawBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL + "/api",
   credentials: "include",
 });
+
+
+
+// import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+// import {
+//   logout,
+//   setAccessToken,
+//   setUser,
+// } from "./features/auth/authSlice";
+
+// const baseQuery = fetchBaseQuery({
+//   baseUrl: import.meta.env.VITE_API_URL + "/api",
+//   credentials: "include",
+
+//   prepareHeaders: (headers, { getState }) => {
+//     const token = getState().auth.accessToken;
+
+//     if (token) {
+//       headers.set("Authorization", `Bearer ${token}`);
+//     }
+
+//     return headers;
+//   },
+// });
+
+// let refreshPromise = null;
+
+// const baseQueryWithReauth = async (args, api, extraOptions) => {
+//   let result = await baseQuery(args, api, extraOptions);
+
+//   if (result?.error?.status !== 401) {
+//     return result;
+//   }
+
+//   // don't refresh while logging in
+//   if (
+//     typeof args === "object" &&
+//     (
+//       args.url === "/user/login" ||
+//       args.url === "/user/register" ||
+//       args.url === "/user/auth/refresh"
+//     )
+//   ) {
+//     return result;
+//   }
+
+//   if (!refreshPromise) {
+//     refreshPromise = baseQuery(
+//       {
+//         url: "/user/auth/refresh",
+//         method: "POST",
+//       },
+//       api,
+//       extraOptions
+//     );
+//   }
+
+//   const refreshResult = await refreshPromise;
+
+//   refreshPromise = null;
+
+//   if (refreshResult.data) {
+//     api.dispatch(
+//       setAccessToken(
+//         refreshResult.data.data.accessToken
+//       )
+//     );
+
+//     api.dispatch(
+//       setUser(
+//         refreshResult.data.data.user
+//       )
+//     );
+
+//     result = await baseQuery(
+//       args,
+//       api,
+//       extraOptions
+//     );
+//   } else {
+//     api.dispatch(logout());
+//   }
+
+//   return result;
+// };
+
+// export const api = createApi({
+//   reducerPath: "api",
+
+//   baseQuery: baseQueryWithReauth,
+
+//   tagTypes: [
+//     "User",
+//     "Expense",
+//     "Budget",
+//     "Category",
+//     "Organization",
+//     "SubBudget",
+//   ],
+
+//   endpoints: () => ({}),
+// });
+
+// // Used only for initial authentication check
+// export const rawBaseQuery = fetchBaseQuery({
+//   baseUrl: import.meta.env.VITE_API_URL + "/api",
+//   credentials: "include",
+// });

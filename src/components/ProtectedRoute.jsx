@@ -1,0 +1,13 @@
+import { Navigate, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+export default function ProtectedRoute() {
+  const { user, loading } = useSelector((state) => state.auth);
+
+  // Wait until the initial /user/profile check finishes
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return user ? <Outlet /> : <Navigate to="/login" replace />;
+}
