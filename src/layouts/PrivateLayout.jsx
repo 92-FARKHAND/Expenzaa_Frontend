@@ -52,6 +52,9 @@ const PrivateLayout = () => {
   // 🔹 ORGANIZATIONS
   // ========================
 
+  console.log(
+ "PRIVATE LAYOUT MOUNTED"
+);
   const {
     data: orgsResponse,
     isLoading: orgsLoading,
@@ -61,6 +64,8 @@ const PrivateLayout = () => {
 
   const organizations = orgsResponse?.data || [];
 
+  console.log(organizations);
+  
 
   // ========================
   // 🔹 USER CONTEXT
@@ -212,9 +217,6 @@ const PrivateLayout = () => {
   // 🔹 RENDER
   // ========================
 
-  console.log(
- "PRIVATE LAYOUT MOUNTED"
-);
 
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-gray-200 overflow-hidden">
