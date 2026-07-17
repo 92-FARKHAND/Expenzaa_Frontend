@@ -11,8 +11,11 @@ import RequireAuth from "./components/RequireAuth";
 import Categories from "./pages/private/Categories.jsx";
 import WelcomePage from "./pages/public/WelcomePage.jsx";
 import Organization from "./pages/private/Organization.jsx";
+import { useLocation } from "react-router-dom";
 
 function App() {
+    const location = useLocation();
+  console.log("Current path:", location.pathname);
   return (
     <Routes>
       {/* ------------------ Public Routes ------------------ */}
