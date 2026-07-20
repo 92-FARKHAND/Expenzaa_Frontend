@@ -2,7 +2,7 @@ import { api } from '../baseApi';
 
 export const organizationApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    // ✅ Create organization
+    //  Create organization
     createOrganization: builder.mutation({
       query: (data) => ({
         url: '/organization/create',
@@ -12,7 +12,7 @@ export const organizationApi = api.injectEndpoints({
       invalidatesTags: ['Organization'],
     }),
 
-    // ✅ Get organization details
+    //  Get organization details
     getOrganizationDetails: builder.query({
       query: (organizationId) => ({
         url: `/organization/getDetails/${organizationId}`,
@@ -23,7 +23,7 @@ export const organizationApi = api.injectEndpoints({
       ],
     }),
 
-    // ✅ Get organizations of current user
+    //  Get organizations of current user
     getUserOrganizations: builder.query({
       query: () => ({
         url: '/organization/getUserOrgs',
@@ -32,7 +32,7 @@ export const organizationApi = api.injectEndpoints({
       providesTags: ['Organization'],
     }),
 
-    // ✅ Update organization
+    //  Update organization
     updateOrganization: builder.mutation({
       query: ({ organizationId, data }) => ({
         url: `/organization/updateOrg/${organizationId}`,
@@ -44,7 +44,7 @@ export const organizationApi = api.injectEndpoints({
       ],
     }),
 
-    // ✅ Delete organization
+    //  Delete organization
     deleteOrganization: builder.mutation({
       query: (organizationId) => ({
         url: `/organization/delete/${organizationId}`,
@@ -53,7 +53,7 @@ export const organizationApi = api.injectEndpoints({
       invalidatesTags: ['Organization'],
     }),
 
-    // ✅ Invite member
+    // Invite member
     inviteMember: builder.mutation({
       query: ({ organizationId, data }) => ({
         url: `/organization/invite/${organizationId}`,
@@ -63,7 +63,7 @@ export const organizationApi = api.injectEndpoints({
       invalidatesTags: ['Organization'],
     }),
 
-    // ✅ Accept invitation
+    // Accept invitation
     acceptInvitation: builder.mutation({
       query: (organizationId) => ({
         url: `/organization/accept/${organizationId}`,
@@ -72,7 +72,7 @@ export const organizationApi = api.injectEndpoints({
       invalidatesTags: ['Organization'],
     }),
 
-    // ✅ Reject invitation
+    //  Reject invitation
     rejectInvitation: builder.mutation({
       query: (organizationId) => ({
         url: `/organization/reject/${organizationId}`,
@@ -81,7 +81,7 @@ export const organizationApi = api.injectEndpoints({
       invalidatesTags: ['Organization'],
     }),
 
-    // ✅ Remove member
+    //  Remove member
     removeMember: builder.mutation({
       query: ({ organizationId, memberId }) => ({
         url: `/organization/${organizationId}/remMembers/${memberId}`,
@@ -90,7 +90,7 @@ export const organizationApi = api.injectEndpoints({
       invalidatesTags: ['Organization'],
     }),
 
-    // ✅ Update member role
+    // Update member role
     updateMemberRole: builder.mutation({
       query: ({ organizationId, memberId, data }) => ({
         url: `/organization/${organizationId}/updMember/${memberId}`,
@@ -100,7 +100,7 @@ export const organizationApi = api.injectEndpoints({
       invalidatesTags: ['Organization'],
     }),
 
-    // ✅ Get organization members
+    //  Get organization members
     getOrganizationMembers: builder.query({
       query: (organizationId) => ({
         url: `/organization/${organizationId}/members`,
@@ -113,7 +113,7 @@ export const organizationApi = api.injectEndpoints({
   }),
 });
 
-// ✅ Export hooks
+//  Export hooks
 export const {
   useCreateOrganizationMutation,
   useGetOrganizationDetailsQuery,

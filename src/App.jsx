@@ -11,6 +11,7 @@ import WelcomePage from "./pages/public/WelcomePage.jsx";
 import Organization from "./pages/private/Organization.jsx";
 import AuthInitializer from "./components/AuthInitializer.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import NotFound from "./pages/public/NotFound.jsx"
 
 function App() {
   
@@ -29,7 +30,7 @@ function App() {
 
 
     {/* ------------------ Private Routes ------------------ */}
-    <Route element={<ProtectedRoute />}>
+    {/* <Route element={<ProtectedRoute />}> */}
       <Route element={<PrivateLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/expenses" element={<Expenses />} />
@@ -37,11 +38,11 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/organization" element={<Organization />} />
       </Route>
-    </Route>
+    {/* </Route> */}
 
 
     {/* ------------------ Fallback ------------------ */}
-    <Route path="*" element={<Navigate to="/" replace />} />
+    <Route path="*" element={<NotFound />} />
 
   </Route>
 

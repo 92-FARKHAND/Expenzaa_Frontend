@@ -8,6 +8,7 @@ import {
   PlusCircle,
   ChevronDown,
   Loader,
+  Loader2
 } from "lucide-react";
 
 import { getErrorMessage } from "../utils/errorParser.js";
@@ -33,9 +34,7 @@ const PrivateLayout = () => {
   const navigate = useNavigate();
 
 
-  // ========================
-  // 🔹 LOCAL STATE
-  // ========================
+  //  LOCAL STATE
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -48,13 +47,8 @@ const PrivateLayout = () => {
   const orgDropdownRef = useRef(null);
 
 
-  // ========================
-  // 🔹 ORGANIZATIONS
-  // ========================
+  //  ORGANIZATIONS
 
-  console.log(
- "PRIVATE LAYOUT MOUNTED"
-);
   const {
     data: orgsResponse,
     isLoading: orgsLoading,
@@ -67,9 +61,7 @@ const PrivateLayout = () => {
   console.log(organizations);
   
 
-  // ========================
-  // 🔹 USER CONTEXT
-  // ========================
+  //  USER CONTEXT
 
   const {currentContext} = useSelector(selectUser);
 
@@ -113,9 +105,7 @@ const PrivateLayout = () => {
 
 
 
-  // ========================
-  // 🔹 CLOSE MENUS
-  // ========================
+  //  CLOSE MENUS
 
   useEffect(() => {
 
@@ -155,10 +145,7 @@ const PrivateLayout = () => {
   }, []);
 
 
-
-  // ========================
-  // 🔹 NAVIGATION
-  // ========================
+  // NAVIGATION
 
   const handleOrgClick = (organizationId) => {
 
@@ -171,9 +158,7 @@ const PrivateLayout = () => {
 
 
 
-  // ========================
-  // 🔹 EXPORT
-  // ========================
+  //  EXPORT
 
   const [
     triggerExport,
@@ -190,11 +175,7 @@ const PrivateLayout = () => {
 
   };
 
-
-
-  // ========================
-  // 🔹 NAV LINKS
-  // ========================
+  //  NAV LINKS
 
   const navLinks = [
     {
@@ -214,7 +195,7 @@ const PrivateLayout = () => {
 
 
   // ========================
-  // 🔹 RENDER
+  //  RENDER
   // ========================
 
 
@@ -367,17 +348,24 @@ const PrivateLayout = () => {
                                   Invited
                                 </span>
                               ) : (
-                                <button
-                                  onClick={(e) => handleSwitchContext(e, isCurrentOrgContext ? null : organization._id)}
-                                  disabled={isSwitching}
-                                  className={`px-2 py-1 rounded text-xs font-semibold border transition-all duration-200 hover:scale-105 active:scale-95 ${
-                                    isCurrentOrgContext
-                                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30 hover:border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.1)]"
-                                      : "bg-blue-600/10 text-blue-400 border-blue-500/20 hover:bg-blue-600/20 hover:border-blue-500/40"
-                                  }`}
-                                >
-                                  {isCurrentOrgContext ? "Go Solo" : "Switch"}
-                                </button>
+                                    <button
+                                      onClick={(e) => handleSwitchContext(e, isCurrentOrgContext ? null : organization._id)}
+                                      disabled={isSwitching}
+                                      className={`px-2 py-1 rounded text-xs font-semibold border transition-all duration-200 hover:scale-105                                     active:scale-95 flex items-center gap-1 ${
+                                        isCurrentOrgContext
+                                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30 hover:border-emerald-                                    500/50 shadow-[0_0_10px_rgba(16,185,129,0.1)]"
+                                          : "bg-blue-600/10 text-blue-400 border-blue-500/20 hover:bg-blue-600/20 hover:border-blue-500/40"
+                                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    >
+                                      {isSwitching ? (
+                                        <>
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                          Switching...
+                                        </>
+                                      ) : (
+                                        isCurrentOrgContext ? "Go Solo" : "Switch"
+                                      )}
+                                    </button>
                               )}
                             </div>
                           );

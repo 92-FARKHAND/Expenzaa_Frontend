@@ -2,7 +2,7 @@ import { api } from '../baseApi';
 
 export const subBudgetApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    // ✅ Get sub-budget for a specific category
+    //  Get sub-budget for a specific category
     getSubBudget: builder.query({
       query: (categoryId) => ({
         url: `/subBudget/getSubBudget/${categoryId}`,
@@ -18,7 +18,7 @@ export const subBudgetApi = api.injectEndpoints({
       providesTags: (result, error, categoryId) => [{ type: "SubBudget", id: categoryId }],
     }),
 
-    // ✅ Set/update sub-budget for a specific category
+    //  Set/update sub-budget for a specific category
     setSubBudget: builder.mutation({
       query: ({ categoryId, data }) => ({
         url: `/subBudget/setSubBudget/${categoryId}`,
@@ -27,12 +27,12 @@ export const subBudgetApi = api.injectEndpoints({
       }),
       invalidatesTags: (result, error, { categoryId }) => [
         { type: "SubBudget", id: categoryId },
-        "Budget",      // ✅ Refreshes budget data
-        "Category",    // ✅ Refreshes category data
+        "Budget",      // Refreshes budget data
+        "Category",    // Refreshes category data
       ],
     }),
   }),
 });
 
-// ✅ Export hooks for components
+//  Export hooks for components
 export const { useGetSubBudgetQuery,useGetSubAllBudgetQuery, useSetSubBudgetMutation } = subBudgetApi;

@@ -105,7 +105,7 @@ const Form = ({ fields, onSubmit, defaultValues = {}, submitLabel = "Submit", on
 
 
       {fields.map((field, index) => {
-  // ✅ HANDLE ROW LAYOUT
+  //HANDLE ROW LAYOUT
   if (field.type === "row") {
     return (
       <div key={index} className="grid grid-cols-2 gap-4">
@@ -137,7 +137,7 @@ const Form = ({ fields, onSubmit, defaultValues = {}, submitLabel = "Submit", on
     );
   }
 
-  // ✅ NORMAL FIELD
+  // NORMAL FIELD
   return (
     <div key={index} className="flex flex-col gap-1">
       <label htmlFor={field.name} className="font-medium text-sm text-white">

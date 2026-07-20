@@ -1,13 +1,4 @@
 import { api } from "../../baseApi";
-
-// import {
-//   setCredentials,
-//   logout,
-//   updateUserContext,
-//   setAccessToken,
-//   setUser
-// } from "./authSlice";
-
 import {
   setUser,
   logout,
@@ -16,11 +7,7 @@ import {
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
 
-    /*
-    ====================================
-    LOGIN
-    ====================================
-    */
+    /* LOGIN    */
 
     login: builder.mutation({
       query: (credentials) => ({
@@ -33,13 +20,6 @@ export const authApi = api.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           dispatch(setUser(data.data.user));
-                   //  dispatch(
-//   setCredentials({
-//     accessToken: data.data.accessToken,
-//     user: data.data.user,
-//   })
-// );
-
         } catch (err) {
           console.error(err);
         }
@@ -48,11 +28,7 @@ export const authApi = api.injectEndpoints({
       invalidatesTags: ["User"],
     }),
 
-    /*
-    ====================================
-    SIGNUP
-    ====================================
-    */
+    /*    SIGNUP    */
 
     signup: builder.mutation({
       query: (formData) => ({
@@ -60,17 +36,11 @@ export const authApi = api.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
            dispatch(setUser(data.data.user));
-//            dispatch(
-//   setCredentials({
-//     accessToken: data.data.accessToken,
-//     user: data.data.user,
-//   })
-// );
+
         } catch (err) {
           console.error(err);
         }
@@ -107,11 +77,7 @@ updateProfile: builder.mutation({
   },
 }),
 
-    /*
-    ====================================
-    LOGOUT
-    ====================================
-    */
+    /*    LOGOUT    */
 
     logout: builder.mutation({
       query: () => ({
@@ -135,11 +101,7 @@ updateProfile: builder.mutation({
       ],
     }),
 
-    /*
-    ====================================
-    CHANGE PASSWORD
-    ====================================
-    */
+    /*    CHANGE PASSWORD    */
 
     changePassword: builder.mutation({
       query: (body) => ({
@@ -150,11 +112,7 @@ updateProfile: builder.mutation({
     }),
 
 
-    /*
-    ====================================
-    UPDATE AVATAR
-    ====================================
-    */
+    /*    UPDATE AVATAR    */
 
     updateAvatar: builder.mutation({
       query: (formData) => ({
@@ -166,11 +124,7 @@ updateProfile: builder.mutation({
       invalidatesTags: ["User"],
     }),
 
-    /*
-    ====================================
-    DELETE ACCOUNT
-    ====================================
-    */
+    /*    DELETE ACCOUNT    */
 
     deleteAccount: builder.mutation({
       query: () => ({
@@ -187,11 +141,7 @@ updateProfile: builder.mutation({
       },
     }),
 
-    /*
-    ====================================
-    SWITCH CONTEXT
-    ====================================
-    */
+    /*    SWITCH CONTEXT    */
 
 switchContext: builder.mutation({
   query: (body) => ({
@@ -203,15 +153,11 @@ switchContext: builder.mutation({
   async onQueryStarted(arg, { dispatch, queryFulfilled }) {
     try {
       const { data } = await queryFulfilled;
-
-      // dispatch(setAccessToken(data.data.accessToken)); // ✅ new token now takes effect immediately
       dispatch(setUser(data.data));
-
     } catch (err) {
       console.error(err);
     }
   },
-
   invalidatesTags: ["User", "Expense", "Budget", "Category", "SubBudget"],
 }),
 

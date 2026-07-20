@@ -6,7 +6,7 @@ const ProfileMenu = ({ closeMenu }) => {
   const navigate = useNavigate();
   const [logout, { isLoading }] = useLogoutMutation();
 
-  // ✅ Proper logout
+  //  Proper logout
   const signOut = async () => {
     try {
       await logout().unwrap();

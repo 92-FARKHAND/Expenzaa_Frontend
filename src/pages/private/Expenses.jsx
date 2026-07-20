@@ -9,6 +9,7 @@ import {
 import {
   useGetCategoriesQuery
 } from "../../store/features/categoryApi.js"
+import Loader from "../../components/Loader.jsx";
 
 const Expenses = () => {
   // Fetch expenses from API
@@ -36,7 +37,7 @@ const Expenses = () => {
   };
 
   if (isLoading)
-    return <p className="text-gray-400 text-center mt-10">Loading expenses...</p>;
+    return <Loader text="Loading expenses..." />;
   if (isError)
     return (
       <p className="text-red-400 text-center mt-10">

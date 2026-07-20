@@ -9,6 +9,7 @@ import {
 } from "../../store/features/categoryApi.js";
 
 import { Pencil } from "lucide-react";
+import Loader from "../../components/Loader.jsx";
 
 const Categories = () => {
   const [showCategoryForm, setShowCategoryForm] = useState(false);
@@ -45,11 +46,7 @@ const [deleteCategory, { isLoading: isDeleting }] =
 
 
   if (isLoading)
-    return (
-      <div className="flex justify-center items-center h-40 text-gray-300">
-        Loading categories...
-      </div>
-    );
+    return <Loader text="Loading categories..."/>
 
   if (isError)
     return (

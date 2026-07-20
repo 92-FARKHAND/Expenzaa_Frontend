@@ -2,7 +2,7 @@ import {api} from '../baseApi'
 
 export const budgetApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    // ✅ Get current user budget details
+    // Get current user budget details
     getBudget: builder.query({
       query: () => ({
         url: "/budget/detail",
@@ -11,7 +11,7 @@ export const budgetApi = api.injectEndpoints({
       providesTags: ["Budget"], // helpful for cache invalidation
     }),
 
-    // ✅ Edit user budget
+    // Edit user budget
     editBudget: builder.mutation({
       query: (data) => ({
         url: "/budget/edit",
@@ -23,5 +23,5 @@ export const budgetApi = api.injectEndpoints({
   }),
 });
 
-// ✅ Export hooks for components
+// Export hooks for components
 export const { useGetBudgetQuery, useEditBudgetMutation } = budgetApi;
