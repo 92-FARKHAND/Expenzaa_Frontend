@@ -10,11 +10,14 @@ export default function FieldEditor({
   editValues,
   fieldErrors,
   isLoading,
+  disabled = false,
   onEditChange,
   onToggleEdit,
   onSave,
   onCancel,
 }) {
+  const isEditing = editingFields[field] && !disabled;
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div className="flex-1">
@@ -22,7 +25,7 @@ export default function FieldEditor({
           {label}
         </label>
 
-        {editingFields[field] ? (
+        {isEditing ? (
           <div>
             <input
               type={type}
@@ -33,8 +36,11 @@ export default function FieldEditor({
                 fieldErrors[field] ? "border-red-500" : "border-gray-600"
               } focus:outline-none focus:border-blue-500 disabled:bg-gray-600`}
             />
+
             {fieldErrors[field] && (
-              <p className="text-red-500 text-sm mt-1">{fieldErrors[field]}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {fieldErrors[field]}
+              </p>
             )}
           </div>
         ) : (
@@ -43,7 +49,7 @@ export default function FieldEditor({
       </div>
 
       <div className="flex gap-2 sm:flex-col">
-        {editingFields[field] ? (
+        {isEditing ? (
           <>
             <button
               onClick={() => onSave(field)}
@@ -58,6 +64,7 @@ export default function FieldEditor({
               )}
               <span className="hidden sm:inline">Save</span>
             </button>
+
             <button
               onClick={() => onCancel(field)}
               disabled={isLoading}
@@ -70,12 +77,23 @@ export default function FieldEditor({
           </>
         ) : (
           <button
-            onClick={() => onToggleEdit(field)}
-            className="flex items-center justify-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition-colors flex-1 sm:flex-none"
-            title="Edit this field"
+            onClick={() => {
+              if (!disabled) {
+                onToggleEdit(field);
+              }
+            }}
+            disabled={disabled}
+            className={`flex items-center justify-center gap-1 text-white px-3 py-2 rounded transition-colors flex-1 sm:flex-none ${
+              disabled
+                ? "bg-gray-600 cursor-not-allowed opacity-50"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
+            title={disabled ? "Only admins can edit" : "Edit this field"}
           >
             <Edit2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Edit</span>
+            <span className="hidden sm:inline">
+              {disabled ? "Locked" : "Edit"}
+            </span>
           </button>
         )}
       </div>

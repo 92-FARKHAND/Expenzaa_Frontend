@@ -473,7 +473,7 @@ const getRoleIcon = (role) => {
 
         <Card title="Organization Details" className="mb-8">
           <div className="space-y-5">
-            // DESCRIPTION
+            {/* DESCRIPTION */}
              <FieldEditor
                label="Description"
                field="description"
@@ -483,13 +483,14 @@ const getRoleIcon = (role) => {
                editValues={editValues}
                fieldErrors={fieldErrors}
                isLoading={updating}
+               disabled={!isAdmin}
                onEditChange={handleEditChange}
                onToggleEdit={toggleEditField}
                onSave={handleSaveField}
                onCancel={handleCancel}
              />
              
-             // WEBSITE
+             {/* WEBSITE */}
              <FieldEditor
                label="Website"
                field="website"
@@ -499,6 +500,7 @@ const getRoleIcon = (role) => {
                editValues={editValues}
                fieldErrors={fieldErrors}
                isLoading={updating}
+               disabled={!isAdmin}
                onEditChange={handleEditChange}
                onToggleEdit={toggleEditField}
                onSave={handleSaveField}
