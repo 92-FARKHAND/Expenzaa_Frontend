@@ -4,15 +4,11 @@ import { useChangePasswordMutation } from "../store/features/auth/authApi";
 import { getErrorMessage } from "../utils/errorParser.js";
 
 export default function ChangePasswordModal({ isOpen, onClose }) {
-  // ========================
-  // 🔹 MUTATIONS
-  // ========================
+  // MUTATIONS
   const [changePassword, { isLoading: isChangingPassword }] =
     useChangePasswordMutation();
 
-  // ========================
-  // 🔹 STATE
-  // ========================
+  // STATE
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -24,9 +20,7 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
     message: "",
   });
 
-  // ========================
-  // 🔹 HANDLERS
-  // ========================
+  // HANDLERS
   const handlePasswordFormChange = (field, value) => {
     setPasswordForm((prev) => ({
       ...prev,
@@ -116,9 +110,7 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
     onClose();
   };
 
-  // ========================
-  // 🔹 RENDER
-  // ========================
+  // RENDER
   if (!isOpen) return null;
 
   return (

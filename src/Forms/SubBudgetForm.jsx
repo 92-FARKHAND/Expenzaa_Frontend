@@ -7,7 +7,7 @@ const SubBudgetForm = ({ category, onSuccess, onClose }) => {
   const [setSubBudget, { isLoading: isUpdating }] = useSetSubBudgetMutation();
   const [errorMessage, setErrorMessage] = useState("");
 
-  // ✅ Use subBudget data from the parent category prop (already fetched)
+  // Use subBudget data from the parent category prop (already fetched)
   const subBudgetData = category.subBudget || {};
 
   const handleSubmit = async (data) => {
@@ -18,15 +18,12 @@ const SubBudgetForm = ({ category, onSuccess, onClose }) => {
         currency: data.currency,
       };
 
-      console.log("📤 Sending payload:", payload);
-      console.log("📤 Category ID:", category._id);
 
       await setSubBudget({
         categoryId: category._id,
         data: payload,
       }).unwrap();
 
-      console.log("✅ Subbudget updated successfully");
       if (onSuccess) onSuccess();
     } catch (error) {
       setErrorMessage(getErrorMessage(error));

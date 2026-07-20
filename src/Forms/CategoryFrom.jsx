@@ -1,5 +1,3 @@
-// src/components/CategoryForm.jsx
-
 import { useState } from "react";
 import Form from "../components/Form";
 import { useCreateCategoryMutation } from "../store/features/categoryApi";

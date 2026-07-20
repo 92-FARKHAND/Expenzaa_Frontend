@@ -1,33 +1,33 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Card from '../../components/Card.jsx';
+import FieldEditor from "../../components/FieldEditor.jsx";
+import InviteMemberForm from "../../Forms/InviteMemberForm.jsx";
+import ChangeRoleForm from "../../Forms/ChangeRoleForm.jsx";
 import {
   Building2,
   Users,
   Calendar,
   User,
   ShieldCheck,
-  Pencil,
   X,
   Check,
   Plus,
   Trash2,
   Crown,
-  Mail,
-  Search,
-  AlertCircle,
-  CheckCircle,
   Clock
 } from 'lucide-react';
 import { getErrorMessage } from '../../utils/errorParser.js';
 import {
   useGetOrganizationDetailsQuery,
+  useUpdateOrganizationMutation,
   useInviteMemberMutation,
   useRemoveMemberMutation,
   useUpdateMemberRoleMutation,
   useAcceptInvitationMutation,
   useRejectInvitationMutation
 } from "../../store/features/organizationApi.js"
+import Loader from '../../components/Loader.jsx';
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', {
@@ -44,6 +44,8 @@ export default function Organization() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [editingFields, setEditingFields] = useState({});
   const [editValues, setEditValues] = useState({});
+  // for field editor
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Invitation states
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -62,7 +64,7 @@ export default function Organization() {
   const organizationId = searchParams.get('id');
 
   // Fetch organization data
-  const { data: orgResponse, isLoading: apiLoading, error: apiError } =
+  const { data: orgResponse, isLoading: apiLoading, error: apiError, refetch } =
     useGetOrganizationDetailsQuery(organizationId, { skip: !organizationId });
     
 
@@ -72,6 +74,8 @@ export default function Organization() {
   const [triggerUpdateRole, { isLoading: updatingRoleLoading }] = useUpdateMemberRoleMutation();
   const [acceptInvitation, { isLoading: accepting }] = useAcceptInvitationMutation();
   const [rejectInvitation, { isLoading: rejecting }] = useRejectInvitationMutation();
+  const [triggerUpdateOrganization , { isLoading: updating }] = useUpdateOrganizationMutation();
+
 
   const isInvited = orgResponse?.data?.userStatus === 'invited';
   const isActive = orgResponse?.data?.userStatus === 'active';
@@ -101,15 +105,15 @@ export default function Organization() {
       });
 
       const mappedMembers = orgData.members.map((member) => ({
-  _id: member._id,
-  name: member.fullName,
-  email: member.email,
-  role: member.role,
-  joinedAt: member.joinedAt,
-  avatar:
-    member.avatar ||
-    `https://ui-avatars.com/api/?name=${member.fullName}&background=3b82f6&color=fff`,
-}));
+          _id: member._id,
+          name: member.fullName,
+          email: member.email,
+          role: member.role,
+          joinedAt: member.joinedAt,
+          avatar:
+            member.avatar ||
+            `https://ui-avatars.com/api/?name=${member.fullName}&background=3b82f6&color=fff`,
+        }));
 
       setMembers(mappedMembers);
       setEditValues({
@@ -118,6 +122,7 @@ export default function Organization() {
         description: orgData.description || '',
         createdBy: orgData.createdBy?.fullName || 'Unknown',
         createdAt: orgData.createdAt,
+        status: member.status,
         memberCount: parseInt(orgData.memberCount) || 0,
         location: orgData.location || 'Not specified',
         website: orgData.website || '',
@@ -125,7 +130,19 @@ export default function Organization() {
       });
 
       setLoading(false);
+
+      const invitedMembers = orgData.members
+       .filter((member) => member.status === "invited")
+       .map((member) => ({
+         _id: member._id,
+         email: member.email,
+         role: member.role,
+         sentAt: member.joinedAt, // or member.invitedAt if your API provides it
+       }));
+     
+     setPendingInvitations(invitedMembers);
     }
+    
 
     if (apiLoading) {
       setLoading(true);
@@ -151,19 +168,58 @@ export default function Organization() {
     }));
   };
 
-  const handleSaveField = async (field) => {
-    try {
-      setOrganization(prev => ({
-        ...prev,
-        [field]: editValues[field]
-      }));
-      toggleEditField(field);
-      setMessage({ type: 'success', text: 'Organization updated successfully!' });
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-    } catch (err) {
-      setMessage({ type: 'error', text: getErrorMessage(err) });
-    }
-  };
+  // for edit org details
+const handleSaveField = async (field) => {
+  setFieldErrors({});
+
+  try {
+    const payload = {
+      [field]: editValues[field],
+    };
+
+    await triggerUpdateOrganization({
+      organizationId,
+      data: payload,
+    }).unwrap();
+
+    setOrganization((prev) => ({
+      ...prev,
+      [field]: editValues[field],
+    }));
+
+    setEditingFields((prev) => ({
+      ...prev,
+      [field]: false,
+    }));
+
+    setMessage({
+      type: "success",
+      text: "Organization updated successfully!",
+    });
+
+    setTimeout(() => {
+      setMessage({ type: "", text: "" });
+    }, 3000);
+  } catch (err) {
+    setMessage({
+      type: "error",
+      text: getErrorMessage(err),
+    });
+  }
+};
+  // const handleSaveField = async (field) => {
+  //   try {
+  //     setOrganization(prev => ({
+  //       ...prev,
+  //       [field]: editValues[field]
+  //     }));
+  //     toggleEditField(field);
+  //     setMessage({ type: 'success', text: 'Organization updated successfully!' });
+  //     setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+  //   } catch (err) {
+  //     setMessage({ type: 'error', text: getErrorMessage(err) });
+  //   }
+  // };
 
   const handleCancel = (field) => {
     setEditValues(prev => ({
@@ -174,36 +230,50 @@ export default function Organization() {
   };
 
   // Handle invite member
-  const handleInviteMember = async (e) => {
-    e.preventDefault();
+const handleInviteMember = async (e) => {
+  e.preventDefault();
 
-    if (!inviteEmail.trim()) {
-      setMessage({ type: 'error', text: 'Please enter an email address' });
-      return;
-    }
+  if (!inviteEmail.trim()) {
+    setMessage({ type: 'error', text: 'Please enter an email address' });
+    return;
+  }
 
-    setInviting(true);
+  setInviting(true);
 
-    try {
-      await triggerInviteMember({
-        organizationId,
-        data: { inviteeEmail: inviteEmail, role: inviteRole }
-      }).unwrap();
-console.log(inviteEmail, organizationId, inviteRole);
-      setPendingInvitations(prev => [...prev, { email: inviteEmail, role: inviteRole, sentAt: new Date() }]);
-      setMessage({ type: 'success', text: `Invitation sent to ${inviteEmail}!` });
-      setInviteEmail('');
-      setInviteRole('member');
-      setShowInviteModal(false);
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-    } catch (err) {
-      setMessage({ type: 'error', text: getErrorMessage(err) });
-      console.log("error1");
-      
-    } finally {
-      setInviting(false);
-    }
-  };
+  try {
+    await triggerInviteMember({
+      organizationId,
+      data: {
+        inviteeEmail: inviteEmail,
+        role: inviteRole
+      }
+    }).unwrap();
+
+    // Get latest members including invited user
+    await refetch();
+
+    setMessage({
+      type: 'success',
+      text: `Invitation sent to ${inviteEmail}!`
+    });
+
+    setInviteEmail('');
+    setInviteRole('member');
+    setShowInviteModal(false);
+
+    setTimeout(() => {
+      setMessage({ type: '', text: '' });
+    }, 3000);
+
+  } catch (err) {
+    setMessage({
+      type: 'error',
+      text: getErrorMessage(err)
+    });
+  } finally {
+    setInviting(false);
+  }
+};
 
   // Handle remove member
   const handleRemoveMember = async (memberId, memberName) => {
@@ -289,11 +359,7 @@ const getRoleIcon = (role) => {
 };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
+    return <Loader text="Loading organization..."/>
   }
 
   if (!organization) {
@@ -407,112 +473,37 @@ const getRoleIcon = (role) => {
 
         <Card title="Organization Details" className="mb-8">
           <div className="space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between p-4 bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors">
-              <div className="mb-3 sm:mb-0 flex-1">
-                <p className="text-gray-400 text-sm font-semibold mb-1">Description</p>
-                {editingFields.description ? (
-                  <textarea
-                    value={editValues.description}
-                    onChange={(e) => handleEditChange('description', e.target.value)}
-                    className="w-full bg-white text-gray-900 px-3 py-2 rounded border border-gray-300 focus:outline-none focus:border-primary-500"
-                    rows="4"
-                  />
-                ) : (
-                  <p className="text-white text-base leading-relaxed">
-                    {organization.description || 'No description provided'}
-                  </p>
-                )}
-              </div>
-              {isAdmin && (
-                <div className="flex gap-2 sm:ml-4">
-                  {editingFields.description ? (
-                    <>
-                      <button
-                        onClick={() => handleSaveField('description')}
-                        className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition-colors"
-                      >
-                        <Check className="w-4 h-4" />
-                        <span className="hidden sm:inline">Save</span>
-                      </button>
-                      <button
-                        onClick={() => handleCancel('description')}
-                        className="flex items-center gap-1 bg-gray-600 hover:bg-gray-500 text-white px-3 py-2 rounded transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                        <span className="hidden sm:inline">Cancel</span>
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => toggleEditField('description')}
-                      className="flex items-center gap-1 bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded transition-colors"
-                    >
-                      <Pencil className="w-4 h-4" />
-                      <span className="hidden sm:inline">Edit</span>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors">
-              <div className="mb-3 sm:mb-0 flex-1">
-                <p className="text-gray-500 text-sm font-semibold mb-1">Website</p>
-                {editingFields.website ? (
-                  <input
-                    type="text"
-                    value={editValues.website}
-                    onChange={(e) => handleEditChange('website', e.target.value)}
-                    className="w-full bg-white text-gray-900 px-3 py-2 rounded border border-gray-300 focus:outline-none focus:border-primary-500"
-                  />
-                ) : (
-                  <>
-                    {organization.website ? (
-                      <a
-                        href={`https://${organization.website}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-400 hover:text-primary-300 text-base break-all"
-                      >
-                        {organization.website}
-                      </a>
-                    ) : (
-                      <p className="text-gray-400">No website provided</p>
-                    )}
-                  </>
-                )}
-              </div>
-              {isAdmin && (
-                <div className="flex gap-2 sm:ml-4">
-                  {editingFields.website ? (
-                    <>
-                      <button
-                        onClick={() => handleSaveField('website')}
-                        className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition-colors"
-                      >
-                        <Check className="w-4 h-4" />
-                        <span className="hidden sm:inline">Save</span>
-                      </button>
-                      <button
-                        onClick={() => handleCancel('website')}
-                        className="flex items-center gap-1 bg-gray-600 hover:bg-gray-500 text-white px-3 py-2 rounded transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                        <span className="hidden sm:inline">Cancel</span>
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => toggleEditField('website')}
-                      className="flex items-center gap-1 bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded transition-colors"
-                    >
-                      <Pencil className="w-4 h-4" />
-                      <span className="hidden sm:inline">Edit</span>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+            // DESCRIPTION
+             <FieldEditor
+               label="Description"
+               field="description"
+               value={organization.description || "No description provided"}
+               type="text"
+               editingFields={editingFields}
+               editValues={editValues}
+               fieldErrors={fieldErrors}
+               isLoading={updating}
+               onEditChange={handleEditChange}
+               onToggleEdit={toggleEditField}
+               onSave={handleSaveField}
+               onCancel={handleCancel}
+             />
+             
+             // WEBSITE
+             <FieldEditor
+               label="Website"
+               field="website"
+               value={organization.website || "No website provided"}
+               type="text"
+               editingFields={editingFields}
+               editValues={editValues}
+               fieldErrors={fieldErrors}
+               isLoading={updating}
+               onEditChange={handleEditChange}
+               onToggleEdit={toggleEditField}
+               onSave={handleSaveField}
+               onCancel={handleCancel}
+             />
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-900 rounded-lg">
               <div className="flex-1">
@@ -579,7 +570,7 @@ const getRoleIcon = (role) => {
                     className="w-12 h-12 rounded-full object-cover border-2 border-primary-200"
                   />
                   <div>
-                    <h4 className="font-semibold text-while">{member.name}</h4>
+                    <h4 className="font-semibold text-white">{member.name}</h4>
                     <p className="text-sm text-gray-400">{member.email}</p>
                   </div>
                 </div>
@@ -637,134 +628,59 @@ const getRoleIcon = (role) => {
       </div>
 
       {/* Invite Member Modal */}
-      {showInviteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white">Invite Member</h2>
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleInviteMember} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <input
-                    type="email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    placeholder="member@example.com"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    disabled={inviting}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Role
-                </label>
-                <select
-                  value={inviteRole}
-                  onChange={(e) => setInviteRole(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-800"
-                  disabled={inviting}
-                >
-                  <option value="manager">Manager</option>
-                  <option value="admin">Admin</option>
-                  <option value="member">Member</option>
-                </select>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={inviting}
-                  className="flex-1 bg-primary-600 hover:bg-primary-700 bg-blue-800 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 hover:bg-gray-700"
-                >
-                  {inviting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Mail className="w-5 h-5" />
-                      Send Invitation
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowInviteModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </Card>
-        </div>
-      )}
-
-      {/* Role Change Modal */}
-      {roleChangeModal.open && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white">Change Member Role</h2>
-              <button
-                onClick={() => setRoleChangeModal({ open: false, memberId: null, currentRole: '' })}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-gray-500">Current role: <span className="text-white font-semibold">{roleChangeModal.currentRole}</span></p>
-
-              <div className="space-y-2">
-                {['member', 'admin','manager'].map((role) => (
-                  <button
-                    key={role}
-                    onClick={() => handleUpdateRole(roleChangeModal.memberId, role)}
-                    disabled={updatingRoleLoading || role === roleChangeModal.currentRole}
-                    className={`w-full p-3 border-2 rounded-lg font-semibold transition-colors capitalize ${role === roleChangeModal.currentRole
-                      ? 'border-gray-300 text-gray-700 cursor-not-allowed'
-                      : 'border-primary-600 bg-primary-50 text-primary-700 hover:scale-105'
-                      }`}
-                  >
-                    {updatingRoleLoading ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                        Updating...
-                      </div>
-                    ) : (
-                      role
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                onClick={() => setRoleChangeModal({ open: false, memberId: null, currentRole: '' })}
-                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </Card>
-        </div>
-      )}
+       <InviteMemberForm
+         open={showInviteModal}
+         onClose={() => setShowInviteModal(false)}
+         loading={invitingLoading}
+         apiError={message.type === "error" ? message.text : ""}
+         onSubmit={async (values) => {
+           try {
+             await triggerInviteMember({
+               organizationId,
+               data: values,
+             }).unwrap();
+       
+             setPendingInvitations((prev) => [
+               ...prev,
+               {
+                 email: values.inviteeEmail,
+                 role: values.role,
+                 sentAt: new Date(),
+               },
+             ]);
+       
+             setShowInviteModal(false);
+       
+             setMessage({
+               type: "success",
+               text: "Invitation sent successfully!",
+             });
+           } catch (err) {
+             setMessage({
+               type: "error",
+               text: getErrorMessage(err),
+             });
+           }
+         }}
+       />
+       
+             {/* Role Change Modal */}
+       <ChangeRoleForm
+         open={roleChangeModal.open}
+         currentRole={roleChangeModal.currentRole}
+         loading={updatingRoleLoading}
+         apiError={message.type === "error" ? message.text : ""}
+         onClose={() =>
+           setRoleChangeModal({
+             open: false,
+             memberId: null,
+             currentRole: "",
+           })
+         }
+         onSubmit={async (values) => {
+           await handleUpdateRole(roleChangeModal.memberId, values.role);
+         }}
+       />
     </div>
   );
 }

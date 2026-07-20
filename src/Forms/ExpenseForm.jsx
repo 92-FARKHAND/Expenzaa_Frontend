@@ -27,33 +27,26 @@ const ExpenseForm = ({ defaultValues = {}, mode, onSuccess, onClose }) => {
   // Fetch categories
   const { data: categories = [], isLoading: catLoading } = useGetCategoriesQuery();
 
-  // ✅ Debug: Log user object to help diagnose issues
-  console.log("📊 User in ExpenseForm:", {
-    user,
-    hasCurrentContext: !!user?.currentContext,
-    contextType: user?.currentContext?.type,
-    userId: user?._id,
-    organizationId: user?.currentContext?.organizationId,
-  });
+
 
   const handleSubmit = async (data) => {
     setErrorMessage("");
     
-    // ✅ DEFENSIVE: Check if user exists
+    // DEFENSIVE: Check if user exists
     if (!user) {
       setErrorMessage("User not found. Please log in again.");
-      console.error("❌ No user in Redux state");
+      console.error(" No user in Redux state");
       return;
     }
 
-    // ✅ DEFENSIVE: Check if user has ID
+    // DEFENSIVE: Check if user has ID
     if (!user._id) {
       setErrorMessage("User ID not found. Please log in again.");
-      console.error("❌ User missing _id");
+      console.error(" User missing _id");
       return;
     }
 
-    // ✅ DEFENSIVE: Check if currentContext exists, use default if not
+    // DEFENSIVE: Check if currentContext exists, use default if not
     const currentContext = user.currentContext || {
       type: "solo",
       organizationId: null,
@@ -67,38 +60,35 @@ const ExpenseForm = ({ defaultValues = {}, mode, onSuccess, onClose }) => {
       // Add userId or organizationId based on context
       if (currentContext.type === "solo") {
         contextData.userId = user._id;
-        console.log("📝 Submitting solo expense with userId:", user._id);
+        console.log(" Submitting solo expense with userId:", user._id);
       } else if (currentContext.type === "organization") {
-        // ✅ DEFENSIVE: Validate organizationId exists
+        // DEFENSIVE: Validate organizationId exists
         if (!currentContext.organizationId) {
           setErrorMessage(
             "Organization ID not found. Please switch contexts and try again."
           );
-          console.error("❌ Organization context missing organizationId");
+          console.error(" Organization context missing organizationId");
           return;
         }
         contextData.organizationId = currentContext.organizationId;
-        console.log(
-          "🏢 Submitting organization expense with organizationId:",
-          currentContext.organizationId
-        );
+
       } else {
         setErrorMessage(`Invalid context type: ${currentContext.type}`);
-        console.error("❌ Unknown context type:", currentContext.type);
+        console.error(" Unknown context type:", currentContext.type);
         return;
       }
 
       if (isEdit) {
-        console.log("📝 Editing expense with data:", contextData);
+        console.log(" Editing expense with data:", contextData);
         await editExpense({ 
           ...contextData, 
           expenseId: defaultValues._id 
         }).unwrap();
-        console.log("✅ Expense updated successfully");
+        console.log("Expense updated successfully");
       } else {
-        console.log("📝 Creating expense with data:", contextData);
+        console.log(" Creating expense with data:", contextData);
         await createExpense(contextData).unwrap();
-        console.log("✅ Expense created successfully");
+        console.log(" Expense created successfully");
       }
       
       if (onSuccess) onSuccess();
@@ -166,7 +156,7 @@ const ExpenseForm = ({ defaultValues = {}, mode, onSuccess, onClose }) => {
   },
 ];
 
-  // ✅ DEFENSIVE: Check if form can be rendered
+  // DEFENSIVE: Check if form can be rendered
   if (!user) {
     return (
       <div className="bg-gray-900 border border-red-600 rounded-xl p-6">
@@ -192,7 +182,7 @@ const ExpenseForm = ({ defaultValues = {}, mode, onSuccess, onClose }) => {
         {isEdit ? "Edit Expense" : "Create Expense"}
       </h2>
       
-      {/* ✅ Display current context indicator */}
+      {/* Display current context indicator */}
       <div className="mb-4 p-3 bg-gray-800 border border-gray-700 rounded-lg text-center">
         {currentContext.type === "solo" ? (
           <span className="text-sm text-blue-400">

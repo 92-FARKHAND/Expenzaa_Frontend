@@ -1,5 +1,3 @@
-// src/components/BudgetForm.jsx
-
 import { useState } from "react";
 import Form from "../components/Form.jsx";
 import {
@@ -13,7 +11,6 @@ const BudgetForm = ({ onSuccess, onClose }) => {
   const [editBudget, { isLoading: updating }] = useEditBudgetMutation();
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Extract budget fields
   const budget = data?.data?.budget || {};
 
   const defaultValues = {
