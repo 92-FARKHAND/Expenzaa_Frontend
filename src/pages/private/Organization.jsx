@@ -109,6 +109,7 @@ export default function Organization() {
           name: member.fullName,
           email: member.email,
           role: member.role,
+          status: member.status,
           joinedAt: member.joinedAt,
           avatar:
             member.avatar ||
@@ -122,7 +123,6 @@ export default function Organization() {
         description: orgData.description || '',
         createdBy: orgData.createdBy?.fullName || 'Unknown',
         createdAt: orgData.createdAt,
-        status: member.status,
         memberCount: parseInt(orgData.memberCount) || 0,
         location: orgData.location || 'Not specified',
         website: orgData.website || '',
